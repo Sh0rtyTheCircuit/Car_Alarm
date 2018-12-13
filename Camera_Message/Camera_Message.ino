@@ -4,16 +4,17 @@
 #include <WiFiClient.h>
 #include <PubSubClient.h>
 
+
 // #### Pins Setup #### //
 
-const int Sensor = D2;
+//const int Sensor = D2;
 
-int SensorRead =  0;
+//int SensorRead =  0;
 
 // #### MQTT Server connection Setup - Raspberry Pi Broker #### //
 char* mqtt_server = "192.168.43.40";  
 int mqtt_port = 1883;  
-char* topic = "Sound_Sensor";
+char* topic = "Camera_Message";
 
 WiFiClient Wifi;            //Setup Wifi object 
 PubSubClient client(Wifi);  //Object that gives you all the MQTT functionality, access objects in PubSubClient Library
@@ -22,16 +23,34 @@ PubSubClient client(Wifi);  //Object that gives you all the MQTT functionality, 
 char WifiName[] = "Verizon-SM-G935V";            //SSID
 char Password[] = "password";
 
-void Msg_rcv(char* topic, byte* payload, unsigned int length){     //Unsigned int = Positive numbers (more range)
-  Serial.println ("Message Received");
+void Send_Msg(){
+  //digitalWrite(GREEN,HIGH);
+  //delay (200);
+}
+
+void Take_Pics(){
+  //digitalWrite(GREEN,HIGH);
+  //delay (200);
+}
+
+void Msg_rcv(char* topic, byte* payload, unsigned int length){  
+Serial.println((char)payload[1]);
+  if ((char) payload[0] == 'o'){
+    if ((char) payload[1] == 'f'){    //Equal to "off"
+      //Take pictures and send message
+    }
+    else{
+      //Don't do anything
+    }
+  }
 }
 
 void setup() {
   // put your setup code here, to run once:
-pinMode (Sensor, INPUT);
-Serial.begin (9600);
+  pinMode (Sensor, INPUT);
+  Serial.begin (9600);
 
-client.setServer(mqtt_server, mqtt_port);           
+  client.setServer(mqtt_server, mqtt_port);           
   client.setCallback(Msg_rcv);                   //Send payload to function (Msg_rcv)
 
   // ### Begin Connection to Wifi ### //
@@ -45,33 +64,21 @@ client.setServer(mqtt_server, mqtt_port);
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());               //IP assigned to Server by host wifi
 
-  while(!client.connect("Motion_Sensor")){          //LED_board is name of Wemos/arduino connected to code. Waiting to connect to Broker.
+  while(!client.connect("MQTT")){          //LED_board is name of Wemos/arduino connected to code. Waiting to connect to Broker.
     Serial.println("Finding a Connection...");
   }
-  client.subscribe(topic); //Publisher?
+  client.subscribe(topic);
   Serial.println(topic);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-SensorRead = analogRead(Sensor);
-client.loop();
 
+  client.loop();
   if(!client.connected()){
-    client.connect("Motion_Sensor");
+    client.connect("Camera_Message");
     client.publish(topic, "Reconnected");
   }
   
-  if (SensorRead > 850){
-      Serial.println("Car alarm is going off");
-      client.publish(topic,"off");
-      delay (100);
-    }
-  else{
-    client.publish(topic, "on");
-    delay (100);
-  }
+  //Turn_color();
 }
-
-// ### SOURCES ### //
-//https://www.instructables.com/id/Simple-FC-04-Sound-Sensor-Demo/
