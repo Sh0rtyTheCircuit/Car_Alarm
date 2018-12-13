@@ -6,9 +6,9 @@
 
 // #### Pins Setup #### //
 
-const int Sensor = D2;
-
-int SensorRead =  0;
+const int Sensor = D2; //AO
+int SensorRead =  0;  //value of Sensor
+char* CarSwitch = " ";
 
 // #### MQTT Server connection Setup - Raspberry Pi Broker #### //
 char* mqtt_server = "192.168.43.40";  
@@ -28,7 +28,6 @@ void Msg_rcv(char* topic, byte* payload, unsigned int length){     //Unsigned in
 
 void setup() {
   // put your setup code here, to run once:
-pinMode (Sensor, INPUT);
 Serial.begin (9600);
 
 client.setServer(mqtt_server, mqtt_port);           
@@ -64,14 +63,16 @@ client.loop();
   
   if (SensorRead > 850){
       Serial.println("Car alarm is going off");
-      client.publish(topic,"off");
+      CarSwitch = "off";
       delay (100);
     }
   else{
-    client.publish(topic, "on");
+    Serial.println("Car alarm is on");
+    CarSwitch = "on";
     delay (100);
   }
+   client.publish(topic, CarSwitch);
 }
 
 // ### SOURCES ### //
-//https://www.instructables.com/id/Simple-FC-04-Sound-Sensor-Demo/
+//https://tkkrlab.nl/wiki/Arduino_KY-037_Sensitive_microphone_sensor_module
