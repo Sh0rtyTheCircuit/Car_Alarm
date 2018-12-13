@@ -6,7 +6,7 @@
 
 // #### Pins Setup #### //
 
-const int Sensor = D2; //AO
+const int Sensor = D6; //DigitalOutput
 int SensorRead =  0;  //value of Sensor
 char* CarSwitch = " ";
 
@@ -28,9 +28,10 @@ void Msg_rcv(char* topic, byte* payload, unsigned int length){     //Unsigned in
 
 void setup() {
   // put your setup code here, to run once:
-Serial.begin (9600);
+  pinMode(Sensor, INPUT);
+  Serial.begin (9600);
 
-client.setServer(mqtt_server, mqtt_port);           
+  client.setServer(mqtt_server, mqtt_port);           
   client.setCallback(Msg_rcv);                   //Send payload to function (Msg_rcv)
 
   // ### Begin Connection to Wifi ### //
@@ -54,6 +55,7 @@ client.setServer(mqtt_server, mqtt_port);
 void loop() {
   // put your main code here, to run repeatedly:
 SensorRead = analogRead(Sensor);
+Serial.println (SensorRead);
 client.loop();
 
   if(!client.connected()){
@@ -61,7 +63,7 @@ client.loop();
     client.publish(topic, "Reconnected");
   }
   
-  if (SensorRead > 850){
+  if (SensorRead == 1023){
       Serial.println("Car alarm is going off");
       CarSwitch = "off";
       delay (100);

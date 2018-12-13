@@ -1,40 +1,38 @@
-#import os
+import os
 import paho.mqtt.client as mqtt
-import time
-
-#Channel Topic
-#Sound_Sensor = "Sound_Sensor"
-Camera_Message = "Camera_Message"
-
-import paho.mqtt.client as mqtt
-import time
+from time import sleep
 import socket
 import select
 import sys
 import threading
+from slackclient import SlackClient
 
-#Channel Topic
-#Sound_Sensor = "Sound_Sensor"
+#Channel
 Camera_Message = "Camera_Message"
 
-#ip of localhost
+#Connect to the OG MQTT Broker
 mqtt_broker= "192.168.43.40"
 mqtt_port = 1883
 
 Accept_IP = "192.168.43."
 
+#read Slack Token
+file = open("slack_token.txt","r")
+slack_token = file.read()
+slack_token = slack_token.rstrip()
+file.close()
+sc = SlackClient(slack_token)
+
 #Define functions
 
-def msg_rcv(sensors, user_data, msg):   #Interpret Msgs (Loops)
+def msg_rcv(client, user_data, msg):   #Interpret Msgs (Loops)
         print "Car alarm is going " + str(msg.payload)
-        if (str(msg.payload) == "off"):
-                //Do Camera stuff
-        else:
-                //Do Camera Stuff
-				
-		//Send to Slack
-        
-
+        if (str(msg.payload) == "off"):		#Send msg through slack
+                sc.api_call("chat.postMessage",channel="car_alarm",text="Car alarm going off!")
+                for i in range (10):
+                        os.system("raspistill -o image%d.jpg"%i)	#%d replaced with i from "%i"
+                        sleep (10)
+				sc.api_call("chat.postMessage",channel="car_alarm",text="Car alarm going off!")
 def run_broker(client, user_data, flags, rc):                   #Subscribe to topics (Once)
         print "In the broker function"
         client.subscribe(Camera_Message)                       #Listen to the Sensors channel
